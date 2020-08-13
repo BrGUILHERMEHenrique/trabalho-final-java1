@@ -8,8 +8,11 @@ import java.io.InputStreamReader;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Set;
 
 import br.com.serratec.enums.Parentesco;
 import br.com.serratec.exceptions.DependenteExceptions;
@@ -41,7 +44,7 @@ public class TesteFuncionario {
                 	Scanner enter = new Scanner(new InputStreamReader(new FileInputStream(file), "UTF-8"));
                 	FileWriter escrita = new FileWriter(fileSaida);
                 	
-                	List<Funcionario> funcionarios = new ArrayList<Funcionario>();
+                	Set<Funcionario> funcionarios = new HashSet<Funcionario>();
                 	List<Dependente> dependentes = new ArrayList<Dependente>();
                 	Funcionario funcionario = null;
                 	
@@ -56,13 +59,18 @@ public class TesteFuncionario {
                 				String cpfDep = info[1];
                 				String dataNascimento = info[2];
                 				String parentesco = info[3];
-                				Dependente dependente = new Dependente(nomeDep, cpfDep, LocalDate.parse(dataNascimento, formatter), Enum.valueOf(Parentesco.class, parentesco));
-                				funcionario.addDep(dependente);
-                				System.out.println("--Fazendo os calculos de inss e imposto de renda");
-                    			funcionario.calculaInss();
-                    			funcionario.calculaIr();
-                				dependentes.add(dependente);
-                				System.out.println("--Dependente adiocionado ao funcionário com sucesso");
+                				if(cpfDep.length() != 11) {
+                					throw new FuncionarioExceptions("O dependente "+ nomeDep +" tem o cpf de tamanho inválido e por isso não irá para lista");
+                				}else {
+                    				Dependente dependente = new Dependente(nomeDep, cpfDep, LocalDate.parse(dataNascimento, formatter), Enum.valueOf(Parentesco.class, parentesco));
+                    				funcionario.addDep(dependente, LocalDate.parse(dataNascimento, formatter));
+                    				System.out.println("--Fazendo os calculos de inss e imposto de renda");
+                        			funcionario.calculaInss();
+                        			funcionario.calculaIr();
+                    				dependentes.add(dependente);
+                    				System.out.println("--Dependente adicionado ao funcionário com sucesso");
+                    				
+                				}
                 				continue;
                 				
                 			}
@@ -71,13 +79,17 @@ public class TesteFuncionario {
                 			String cpf = info[1];
                 			String dataNascimento = info[2];
                 			String salario = info[3];
-                			funcionario = new Funcionario(nome, cpf, LocalDate.parse(dataNascimento, formatter), Double.parseDouble(salario));
-                			funcionario.verificaCpf(funcionarios, cpf, nome);
-                			funcionarios.add(funcionario);
-                			System.out.println("--funcionário "+ funcionario.getNome() +" adcionado com sucesso a lista");
+                			if(cpf.length() != 11) {
+                				throw new FuncionarioExceptions("O funcionário "+ nome +" tme o cpf inválido e por isso não será incluido a lista");
+                			}else {
+                    			funcionario = new Funcionario(nome, cpf, LocalDate.parse(dataNascimento, formatter), Double.parseDouble(salario));
+                    			funcionarios.add(funcionario);
+                    			System.out.println("--funcionário "+ funcionario.getNome() +" adicionado com sucesso a lista");
+                    			continue;
+                			}
                 			                			
                 		}else {
-                		
+                			
                 			funcionario = null;
                 		}
                 	
@@ -87,21 +99,19 @@ public class TesteFuncionario {
                     		escrita.write(f.toString());
                     	}
 
-//                	for(int i = 0; i < funcionarios.size(); i++) {
-//                		escrita.write(funcionarios.get(i).toString());
-//                	}
                 	escrita.close();
                 	enter.close();
                }catch(IOException e) {
             	   e.printStackTrace();
                }catch(DependenteExceptions d) {
-            	   System.out.println("Idade igual ou superior a 18 anos, por isso não é considerado como dependente");
+            	   	System.out.println(d.getMessage());
                }catch(FuncionarioExceptions f) {
             	   System.out.println(f.getMessage());
-            	   System.out.println("O cpf do funcionário está repetido, verefique o arquivo de entrada");
                }catch(IndexOutOfBoundsException i) {
             	   System.out.println(i.getMessage());
             	   System.out.println("Há algum erro na divisão das linhas do arquivo, ou o mesmo está com algum campo de informação faltando");
+               }catch(InputMismatchException i) {
+            	   System.out.println(i.getMessage());
                }
         }
 

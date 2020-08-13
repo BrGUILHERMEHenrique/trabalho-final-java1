@@ -1,11 +1,10 @@
 package br.com.serratec.model;
 
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import br.com.serratec.enums.Sexo;
-import br.com.serratec.exceptions.DependenteExceptions;
 import br.com.serratec.exceptions.FuncionarioExceptions;
 import br.com.serratec.interfaces.Caculos;
 
@@ -16,6 +15,7 @@ public class Funcionario extends Pessoa implements Caculos {
     private double salarioLiquido;
     private double contaIr;
     private List<Dependente> dependentes = new ArrayList<Dependente>();
+		
 
     @Override
     public void calculaInss() {
@@ -59,16 +59,21 @@ public class Funcionario extends Pessoa implements Caculos {
     		}
     	}
     }
+    
+   
 
 
-
-    public void addDep(Dependente dep){
-        dependentes.add(dep);
+    public void addDep(Dependente dep, LocalDate dataNascimento){
+        if(LocalDate.now().getYear() - dataNascimento.getYear() >= 18) {
+        	System.out.println("O dependente já passou dos 18 e por isso não foi adicionado");
+        }else {
+        	dependentes.add(dep);
+        }
     }
 
     @Override
     public String toString() {
-        return nome + ";" + cpf + ";" + descontoInss + ";" + descontoIR + ";" + salarioLiquido + ";\r";
+        return nome + ";" + cpf + ";" + new DecimalFormat("#####.##").format(descontoInss) + ";" + new DecimalFormat("#####.##").format(descontoIR) + ";" + new DecimalFormat("#####.##").format(salarioLiquido) + ";\r";
     }
 
     public Funcionario(String nome, String cpf, LocalDate dataNascimento, double salarioBruto) {

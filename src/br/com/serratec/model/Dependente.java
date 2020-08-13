@@ -2,8 +2,10 @@ package br.com.serratec.model;
 
 import java.time.LocalDate;
 
+
 import br.com.serratec.enums.Parentesco;
-import br.com.serratec.enums.Sexo;
+
+
 
 public class Dependente extends Pessoa {
     private Parentesco parentesco;
@@ -40,5 +42,5 @@ public class Dependente extends Pessoa {
         this.parentesco = parentesco;
     }
 
-    
+
 }
